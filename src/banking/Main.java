@@ -27,12 +27,29 @@ public class Main {
                     System.out.print("Your Account Number is Already Exit!!");
                 }
             }while (exAcc != null);
-            System.out.print("Enter Account Holder Name :");
-            String accountHolderName = br.readLine();
+
+            //accountHolderName
+            String accountHolderName;
+            do{
+                System.out.print("Enter Account Holder Name :");
+                accountHolderName = br.readLine();
+                if(accountHolderName.isEmpty()){
+                    System.out.println("Account holder name cannot be empty!");
+                }
+            }while (accountHolderName.isEmpty());
+
             System.out.print("Enter Phone Number :");
             String phone = br.readLine();
-            System.out.print("Enter Balance :");
-            double initialBalance = Double.parseDouble(br.readLine());
+
+            double initialBalance;
+            do{
+                System.out.print("Enter Balance :");
+                initialBalance = Double.parseDouble(br.readLine());
+                if(initialBalance < 0){
+                    System.out.println("Initial deposit amount cannot be negative!");
+                }
+            }while (initialBalance < 0);
+
 
             Account account = new Account(accountNumber, accountHolderName, initialBalance, phone);
             masterAccountDB.add(account);
