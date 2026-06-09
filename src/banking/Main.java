@@ -9,25 +9,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-
     static List<Account> masterAccountDB = new ArrayList<>();
     static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     public static void main(String[] args) throws IOException {
+        String menu;
+        do {
+            System.out.println("(1) Create Account !");
+            System.out.println("(2) View Account !");
+            System.out.println("(3) Exit !");
+            System.out.print("Enter Menu Number ?");
+            menu = br.readLine();
+            if (menu.equalsIgnoreCase("1")) {
+                createAccount();
+            } else if (menu.equalsIgnoreCase("2")) {
+                viewAccount();
+            }else{
+                System.out.println("Invalid Menu Number!!!");
+            }
+        }while (!menu.equals("3"));
+    }
+
+    private static void viewAccount() throws IOException {
+        String accountNumber = getAccountNumber();
+        for(Account acc : masterAccountDB){
+            if(acc.getAccountNumber().equalsIgnoreCase(accountNumber)){
+                System.out.println("========Account Information======");
+                System.out.println(acc);
+                return;
+            }
+        }
+        System.out.println("Invalid Account Number!!!!");
+    }
+
+    private static String getAccountNumber() throws IOException {
+        System.out.print("Enter Account Number :");
+        String accountNumber = br.readLine();
+        return accountNumber;
+    }
+
+    private static void createAccount() throws IOException {
         String flag;
         do {
-            String accountNumber = getAccountNumber();
+            String accountNumber = getNewAccountNumber();
             String accountHolderName = getHolderName();
-            System.out.print("Enter Phone Number :");
-            String phone = br.readLine();
+            String phone = getPhoneNumber();
             double initialBalance = getInitialBalance();
-
             Account account = new Account(accountNumber, accountHolderName, initialBalance, phone);
+            System.out.println("Account Create Successful!!!");
             masterAccountDB.add(account);
             System.out.print(account);
             System.out.print("Do You Want to Create New Account YES/NO?");
             flag = br.readLine();
         }while(flag.equalsIgnoreCase("yes"));
+    }
 
+    private static String getPhoneNumber() throws IOException {
+        System.out.print("Enter Phone Number :");
+        String phone = br.readLine();
+        return phone;
     }
 
     private static double getInitialBalance() throws IOException {
@@ -54,15 +93,14 @@ public class Main {
         return accountHolderName;
     }
 
-    private static String getAccountNumber() throws IOException {
+    private static String getNewAccountNumber() throws IOException {
         Account exAcc;
         String accountNumber ;
         do{
-            System.out.print("Enter Account Number :");
-            accountNumber = br.readLine();
+            accountNumber = getAccountNumber();
             exAcc = findByAccountNumber(accountNumber);
             if (exAcc != null) {
-                System.out.print("Your Account Number is Already Exit!!");
+                System.out.println("Your Account Number is Already Exit!!");
             }
         }while (exAcc != null);
 
