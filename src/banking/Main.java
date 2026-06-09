@@ -16,17 +16,21 @@ public class Main {
         do {
             System.out.println("(1) Create Account !");
             System.out.println("(2) View Account !");
-            System.out.println("(3) Exit !");
+            System.out.println("(3) Deposit Amount !");
+            System.out.println("(4) Exit !");
             System.out.print("Enter Menu Number ?");
             menu = br.readLine();
             if (menu.equalsIgnoreCase("1")) {
                 createAccount();
             } else if (menu.equalsIgnoreCase("2")) {
                 viewAccount();
-            }else{
+            }else if (menu.equalsIgnoreCase("3")) {
+                depositAmount();
+            }
+            else{
                 System.out.println("Invalid Menu Number!!!");
             }
-        }while (!menu.equals("3"));
+        }while (!menu.equals("4"));
     }
 
     private static void viewAccount() throws IOException {
@@ -115,4 +119,28 @@ public class Main {
         }
         return null;
     }
-}
+
+    private static void depositAmount() throws IOException {
+        System.out.println("========Deposit Amount======");
+        String accountNumber = getAccountNumber();
+        Account account = findByAccountNumber(accountNumber);
+
+        if(!account.getAccountNumber().equalsIgnoreCase(accountNumber)){
+            System.out.println("========Invalid Account======");
+            return;
+        }
+
+            double depositAmount = 0;
+            do {
+                System.out.print("Enter Deposit Amount : ");
+                depositAmount = Double.parseDouble(br.readLine());
+                if (depositAmount <= 0) {
+                    System.out.println("Deposit Amount must be greater than zero!");
+                }
+            } while (depositAmount <= 0);
+            account.deposit(depositAmount);
+            System.out.println("Deposit Successful!!!");
+            System.out.println("Updated Balance : " + account.getBalance());
+
+        }
+    }

@@ -47,6 +47,10 @@ public class Account {
         return balance;
     }
 
+    public void deposit(double amount){
+        this.balance += amount;
+    }
+
     @Override
     public String toString(){
         return "Account Number : "+ this.accountNumber+"\n"+
