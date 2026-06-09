@@ -124,8 +124,7 @@ public class Main {
         System.out.println("========Deposit Amount======");
         String accountNumber = getAccountNumber();
         Account account = findByAccountNumber(accountNumber);
-
-        if(!account.getAccountNumber().equalsIgnoreCase(accountNumber)){
+        if(account == null){
             System.out.println("========Invalid Account======");
             return;
         }
