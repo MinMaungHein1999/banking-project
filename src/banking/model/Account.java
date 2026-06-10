@@ -51,6 +51,20 @@ public class Account {
         this.balance += amount;
     }
 
+    public void withdraw(double amount){
+        this.balance -= amount;
+    }
+
+    public void transfer(double amount, String accountType){
+        if(accountType.equalsIgnoreCase("Sender")){
+            this.balance -= amount;
+        }
+        if(accountType.equalsIgnoreCase("Receiver")){
+            this.balance += amount;
+        }
+
+    }
+
     @Override
     public String toString(){
         return "Account Number : "+ this.accountNumber+"\n"+

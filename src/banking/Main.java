@@ -11,13 +11,17 @@ import java.util.List;
 public class Main {
     static List<Account> masterAccountDB = new ArrayList<>();
     static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static String menu;
     public static void main(String[] args) throws IOException {
-        String menu;
+
         do {
             System.out.println("(1) Create Account !");
             System.out.println("(2) View Account !");
             System.out.println("(3) Deposit Amount !");
-            System.out.println("(4) Exit !");
+            System.out.println("(4) Withdraw Amount !");
+            System.out.println("(5) Transfer Money !");
+            System.out.println("(6) Check Balance !");
+            System.out.println("(7) Exit !");
             System.out.print("Enter Menu Number ?");
             menu = br.readLine();
             if (menu.equalsIgnoreCase("1")) {
@@ -27,10 +31,16 @@ public class Main {
             }else if (menu.equalsIgnoreCase("3")) {
                 depositAmount();
             }
+            else if (menu.equalsIgnoreCase("4")) {
+                withdrawAmount();
+            }
+            else if (menu.equalsIgnoreCase("5")) {
+                transferMoney();
+            }
             else{
                 System.out.println("Invalid Menu Number!!!");
             }
-        }while (!menu.equals("4"));
+        }while (!menu.equals("5"));
     }
 
     private static void viewAccount() throws IOException {
@@ -47,7 +57,19 @@ public class Main {
 
     private static String getAccountNumber() throws IOException {
         System.out.print("Enter Account Number :");
-        String accountNumber = br.readLine();
+        String   accountNumber = br.readLine();
+        return accountNumber;
+    }
+
+    private static String getSenderAccountNumber() throws IOException {
+        System.out.print("Enter Sender Account Number :");
+        String   accountNumber = br.readLine();
+        return accountNumber;
+    }
+
+    private static String getReveiverAccountNumber() throws IOException {
+        System.out.print("Enter Receiver Account Number :");
+        String   accountNumber = br.readLine();
         return accountNumber;
     }
 
@@ -142,4 +164,67 @@ public class Main {
             System.out.println("Updated Balance : " + account.getBalance());
 
         }
+
+    private static void withdrawAmount() throws IOException {
+        System.out.println("======Withdraw Amount======");
+        String accountNumber = getAccountNumber();
+        Account account = findByAccountNumber(accountNumber);
+        if(account == null){
+            System.out.println("========Invalid Account======");
+            return;
+        }
+
+        double withdrawAmount;
+        do {
+            System.out.print("Enter Withdraw Amount : ");
+            withdrawAmount = Double.parseDouble(br.readLine());
+            if (withdrawAmount <= 0) {
+                System.out.println("Deposit Amount must be greater than zero!");
+                return;
+            }
+            if(withdrawAmount >= account.getBalance()){
+                System.out.println("Insufficient balance.!");
+                return;
+            }
+        } while (withdrawAmount <= 0);
+        account.withdraw(withdrawAmount);
+        System.out.println("WithdrawAmount Successful!!!");
+        System.out.println("Updated Balance : " + account.getBalance());
+
     }
+
+    private static void transferMoney() throws IOException {
+        System.out.println("======Transfer Monery======");
+        String senderAccountNumber = getSenderAccountNumber();
+        Account senderaccount = findByAccountNumber(senderAccountNumber);
+        String receiverAccountNumber = getReveiverAccountNumber();
+        Account receiveraccount = findByAccountNumber(receiverAccountNumber);
+
+        if(senderaccount == null && receiveraccount == null){
+            System.out.println("========Invalid Account======");
+            return;
+        }
+        if(senderaccount.equals(receiveraccount)){
+            System.out.println("========Can't transfer to the same account======");
+        }
+
+        double transferAmount = 0;
+        do{
+            System.out.print("Enter Transfer Amount : ");
+            transferAmount = Double.parseDouble(br.readLine());
+            if(transferAmount <= 0){
+                System.out.println("Trnafer Amount must be greater than zero!");
+                return;
+            }
+            if(transferAmount > senderaccount.getBalance()){
+                System.out.println("Sender account must have sufficient balance");
+            }
+
+        }while (transferAmount <= 0);
+        senderaccount.transfer(transferAmount, "Sender");
+        receiveraccount.transfer(transferAmount, "Receiver");
+        System.out.println("Transferred Successfully!!!");
+        System.out.println("Sender Account Updated Balance : " + senderaccount.getBalance());
+        System.out.println("Receiver Acount Updated Balance : " + receiveraccount.getBalance());
+    }
+}
