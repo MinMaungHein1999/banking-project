@@ -167,67 +167,69 @@ public class Main {
         }
     }
 
-    private static void withdrawAmount() throws IOException {
-        System.out.println("======Withdraw Amount======");
-        String accountNumber = getAccountNumber();
-        Account account = findByAccountNumber(accountNumber);
-        if(account == null){
-            System.out.println("========Invalid Account======");
-            return;
-        }
+    private static void withdrawAmount() throws IOException, AccountNotFoundException, InvalidAmountException {
+        try {
+            System.out.println("======Withdraw Amount======");
+            String accountNumber = getAccountNumber();
+            Account account = findByAccountNumber(accountNumber);
+            if (account == null) {
+                throw new AccountNotFoundException("Account Not Found Exception");
+            }
 
-        double withdrawAmount;
-        do {
+            double withdrawAmount;
+
             System.out.print("Enter Withdraw Amount : ");
             withdrawAmount = Double.parseDouble(br.readLine());
             if (withdrawAmount <= 0) {
-                System.out.println("Deposit Amount must be greater than zero!");
-                return;
+                throw new InvalidAmountException("Withdraw Amount must be greater than zero!");
             }
-            if(withdrawAmount >= account.getBalance()){
-                System.out.println("Insufficient balance.!");
-                return;
+            if (withdrawAmount >= account.getBalance()) {
+                throw new InvalidAmountException("Insufficient balance!");
             }
-        } while (withdrawAmount <= 0);
-        account.withdraw(withdrawAmount);
-        System.out.println("WithdrawAmount Successful!!!");
-        System.out.println("Updated Balance : " + account.getBalance());
+
+            account.withdraw(withdrawAmount);
+            System.out.println("WithdrawAmount Successful!!!");
+            System.out.println("Updated Balance : " + account.getBalance());
+        }catch (BankException ex){
+            System.out.println(ex.getMessage());
+        }
 
     }
 
-    private static void transferMoney() throws IOException {
-        System.out.println("======Transfer Monery======");
-        String senderAccountNumber = getSenderAccountNumber();
-        Account senderaccount = findByAccountNumber(senderAccountNumber);
-        String receiverAccountNumber = getReveiverAccountNumber();
-        Account receiveraccount = findByAccountNumber(receiverAccountNumber);
+    private static void transferMoney() throws IOException, AccountNotFoundException, InvalidAmountException {
+        try {
+            System.out.println("======Transfer Monery======");
+            String senderAccountNumber = getSenderAccountNumber();
+            Account senderaccount = findByAccountNumber(senderAccountNumber);
+            String receiverAccountNumber = getReveiverAccountNumber();
+            Account receiveraccount = findByAccountNumber(receiverAccountNumber);
 
-        if(senderaccount == null || receiveraccount == null){
-            System.out.println("========Invalid Account======");
-            return;
-        }
-        if(senderaccount.equals(receiveraccount)){
-            System.out.println("========Can't transfer to the same account======");
-            return;
-        }
+            if (senderaccount == null || receiveraccount == null) {
+                throw new AccountNotFoundException("Account Not Found Exception");
+            }
+            if (senderaccount.equals(receiveraccount)) {
+                throw new AccountNotFoundException("Account Not Found Exception");
+            }
 
-        double transferAmount = 0;
-        do{
+            double transferAmount = 0;
+
             System.out.print("Enter Transfer Amount : ");
             transferAmount = Double.parseDouble(br.readLine());
-            if(transferAmount <= 0){
-                System.out.println("Transfer Amount must be greater than zero!");
+            if (transferAmount <= 0) {
+                throw new InvalidAmountException("Withdraw Amount must be greater than zero!");
             }
-            if(transferAmount > senderaccount.getBalance()){
-                System.out.println("Sender account must have sufficient balance");
-                return;
+            if (transferAmount > senderaccount.getBalance()) {
+                throw new InvalidAmountException("Sender account must have sufficient balance!");
             }
-        }while (transferAmount <= 0);
-        senderaccount.withdraw(transferAmount);
-        receiveraccount.deposit(transferAmount);
-        System.out.println("Transferred Successfully!!!");
-        System.out.println("Sender Account Updated Balance : " + senderaccount.getBalance());
-        System.out.println("Receiver Acount Updated Balance : " + receiveraccount.getBalance());
+
+            senderaccount.withdraw(transferAmount);
+            receiveraccount.deposit(transferAmount);
+            System.out.println("Transferred Successfully!!!");
+            System.out.println("Sender Account Updated Balance : " + senderaccount.getBalance());
+            System.out.println("Receiver Acount Updated Balance : " + receiveraccount.getBalance());
+        }catch (BankException ex){
+            System.out.println(ex.getMessage());
+        }
     }
 
     private static void checkBalance() throws IOException {
