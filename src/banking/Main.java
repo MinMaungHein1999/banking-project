@@ -16,7 +16,7 @@ public class Main {
     static List<Account> masterAccountDB = new ArrayList<>();
     static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     static String menu;
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InvalidAmountException, AccountNotFoundException {
 
         do {
             System.out.println("(1) Create Account !");
