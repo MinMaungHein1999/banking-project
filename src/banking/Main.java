@@ -1,5 +1,9 @@
 package banking;
 
+import banking.exception.AccountNotFoundException;
+import banking.exception.BankException;
+import banking.exception.DuplicateAccountException;
+import banking.exception.InvalidAmountException;
 import banking.model.Account;
 
 import java.io.BufferedReader;
@@ -47,15 +51,20 @@ public class Main {
     }
 
     private static void viewAccount() throws IOException {
-        String accountNumber = getAccountNumber();
-        for(Account acc : masterAccountDB){
-            if(acc.getAccountNumber().equalsIgnoreCase(accountNumber)){
-                System.out.println("========Account Information======");
-                System.out.println(acc);
-                return;
+        try {
+            String accountNumber = getAccountNumber();
+            for (Account acc : masterAccountDB) {
+                if (acc.getAccountNumber().equalsIgnoreCase(accountNumber)) {
+                    System.out.println("========Account Information======");
+                    System.out.println(acc);
+                    return;
+                }
             }
+            throw new AccountNotFoundException("Invalid Account Number!!!!");
+        }catch (AccountNotFoundException ex){
+            System.out.print(ex.getMessage());
+            viewAccount();
         }
-        System.out.println("Invalid Account Number!!!!");
     }
 
     private static String getAccountNumber() throws IOException {
@@ -77,18 +86,32 @@ public class Main {
     }
 
     private static void createAccount() throws IOException {
-        String flag;
+        String flag = "";
         do {
-            String accountNumber = getNewAccountNumber();
-            String accountHolderName = getHolderName();
-            String phone = getPhoneNumber();
-            double initialBalance = getInitialBalance();
-            Account account = new Account(accountNumber, accountHolderName, initialBalance, phone);
-            System.out.println("Account Create Successful!!!");
-            masterAccountDB.add(account);
-            System.out.print(account);
-            System.out.print("Do You Want to Create New Account YES/NO?");
-            flag = br.readLine();
+            try {
+                String accountNumber = getAccountNumber();
+                if (findByAccountNumber(accountNumber) != null) {
+                    throw new DuplicateAccountException("Account Number already exists.");
+                }
+                String accountHolderName = getHolderName();
+                if (accountHolderName.trim().isEmpty()) {
+                    throw new BankException("Account Holder Name Cannot be empty");
+                }
+                String phone = getPhoneNumber();
+                double initialBalance = getBalance();
+                if (initialBalance < 0) {
+                    throw new InvalidAmountException("Amount Cannot be negative");
+                }
+                Account account = new Account(accountNumber, accountHolderName, initialBalance, phone);
+                System.out.println("Account Create Successful!!!");
+                masterAccountDB.add(account);
+                System.out.print(account);
+                System.out.print("Do You Want to Create New Account YES/NO?");
+                flag = br.readLine();
+            } catch (BankException ex){
+                System.out.println(ex.getMessage());
+                createAccount();
+            }
         }while(flag.equalsIgnoreCase("yes"));
     }
 
@@ -98,42 +121,16 @@ public class Main {
         return phone;
     }
 
-    private static double getInitialBalance() throws IOException {
-        double initialBalance;
-        do{
-            System.out.print("Enter Balance :");
-            initialBalance = Double.parseDouble(br.readLine());
-            if(initialBalance < 0){
-                System.out.println("Initial deposit amount cannot be negative!");
-            }
-        }while (initialBalance < 0);
-        return initialBalance;
+    private static double getBalance() throws IOException {
+        System.out.print("Enter Balance :");
+        double balance = Double.parseDouble(br.readLine());
+        return balance;
     }
 
     private static String getHolderName() throws IOException {
-        String accountHolderName;
-        do{
             System.out.print("Enter Account Holder Name :");
-            accountHolderName = br.readLine();
-            if(accountHolderName.isEmpty()){
-                System.out.println("Account holder name cannot be empty!");
-            }
-        }while (accountHolderName.isEmpty());
-        return accountHolderName;
-    }
-
-    private static String getNewAccountNumber() throws IOException {
-        Account exAcc;
-        String accountNumber ;
-        do{
-            accountNumber = getAccountNumber();
-            exAcc = findByAccountNumber(accountNumber);
-            if (exAcc != null) {
-                System.out.println("Your Account Number is Already Exit!!");
-            }
-        }while (exAcc != null);
-
-        return accountNumber;
+            String accountHolderName = br.readLine();
+            return accountHolderName;
     }
 
     public static Account findByAccountNumber(String accountNumber){
@@ -146,27 +143,29 @@ public class Main {
     }
 
     private static void depositAmount() throws IOException {
-        System.out.println("========Deposit Amount======");
-        String accountNumber = getAccountNumber();
-        Account account = findByAccountNumber(accountNumber);
-        if(account == null){
-            System.out.println("========Invalid Account======");
-            return;
-        }
+        try {
+            System.out.println("========Deposit Amount======");
+            String accountNumber = getAccountNumber();
+            Account account = findByAccountNumber(accountNumber);
 
-            double depositAmount = 0;
-            do {
-                System.out.print("Enter Deposit Amount : ");
-                depositAmount = Double.parseDouble(br.readLine());
-                if (depositAmount <= 0) {
-                    System.out.println("Deposit Amount must be greater than zero!");
-                }
-            } while (depositAmount <= 0);
+            if (account == null) {
+                throw new AccountNotFoundException("Account Not Found Exception");
+            }
+
+            System.out.print("Enter Deposit Amount : ");
+            double depositAmount = Double.parseDouble(br.readLine());
+            if (depositAmount <= 0) {
+                throw new InvalidAmountException("Deposit Amount must be greater than zero!");
+            }
+
             account.deposit(depositAmount);
             System.out.println("Deposit Successful!!!");
             System.out.println("Updated Balance : " + account.getBalance());
-
+        }catch (BankException ex1){
+            System.out.println(ex1.getMessage());
+            depositAmount();
         }
+    }
 
     private static void withdrawAmount() throws IOException {
         System.out.println("======Withdraw Amount======");
@@ -203,12 +202,13 @@ public class Main {
         String receiverAccountNumber = getReveiverAccountNumber();
         Account receiveraccount = findByAccountNumber(receiverAccountNumber);
 
-        if(senderaccount == null && receiveraccount == null){
+        if(senderaccount == null || receiveraccount == null){
             System.out.println("========Invalid Account======");
             return;
         }
         if(senderaccount.equals(receiveraccount)){
             System.out.println("========Can't transfer to the same account======");
+            return;
         }
 
         double transferAmount = 0;
@@ -216,16 +216,15 @@ public class Main {
             System.out.print("Enter Transfer Amount : ");
             transferAmount = Double.parseDouble(br.readLine());
             if(transferAmount <= 0){
-                System.out.println("Trnafer Amount must be greater than zero!");
-                return;
+                System.out.println("Transfer Amount must be greater than zero!");
             }
             if(transferAmount > senderaccount.getBalance()){
                 System.out.println("Sender account must have sufficient balance");
+                return;
             }
-
         }while (transferAmount <= 0);
-        senderaccount.transfer(transferAmount, "Sender");
-        receiveraccount.transfer(transferAmount, "Receiver");
+        senderaccount.withdraw(transferAmount);
+        receiveraccount.deposit(transferAmount);
         System.out.println("Transferred Successfully!!!");
         System.out.println("Sender Account Updated Balance : " + senderaccount.getBalance());
         System.out.println("Receiver Acount Updated Balance : " + receiveraccount.getBalance());
