@@ -37,10 +37,13 @@ public class Main {
             else if (menu.equalsIgnoreCase("5")) {
                 transferMoney();
             }
+            else if (menu.equalsIgnoreCase("6")) {
+                checkBalance();
+            }
             else{
                 System.out.println("Invalid Menu Number!!!");
             }
-        }while (!menu.equals("5"));
+        }while (!menu.equals("7"));
     }
 
     private static void viewAccount() throws IOException {
@@ -226,5 +229,16 @@ public class Main {
         System.out.println("Transferred Successfully!!!");
         System.out.println("Sender Account Updated Balance : " + senderaccount.getBalance());
         System.out.println("Receiver Acount Updated Balance : " + receiveraccount.getBalance());
+    }
+
+    private static void checkBalance() throws IOException {
+        System.out.println("========Check Balance======");
+        String accountNumber = getAccountNumber();
+        Account account = findByAccountNumber(accountNumber);
+        if(account != null){
+            System.out.println("Current Balance : " + account.getBalance());
+        }else {
+            System.out.println("Invalid Account");
+        }
     }
 }
